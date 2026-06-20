@@ -83,9 +83,7 @@ function initDB() {
   }
 }
 
-// Run initDB if called directly (for npm run db:migrate)
-if (require.main === module) {
-  initDB();
-}
+// Always run initDB to ensure tables exist
+initDB();
 
 module.exports = db;

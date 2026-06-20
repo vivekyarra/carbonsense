@@ -1,0 +1,90 @@
+const request = require('supertest');
+const app = require('../src/app');
+const db = require('../src/models/db');
+const { createUser } = require('../src/models/userModel');
+
+// Ensure db is cleaned up
+beforeAll(() => {
+  db.prepare('DELETE FROM users').run();
+});
+
+afterAll(() => {
+  db.prepare('DELETE FROM users').run();
+  db.close();
+});
+
+describe('Auth API', () => {
+  let token;
+  const testUser = {
+    email: 'testauth@example.com',
+    password: 'password123',
+    name: 'Test Auth User'
+  };
+
+  it('should register a new user', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send(testUser);
+    
+    expect(res.statusCode).toEqual(201);
+    expect(res.body).toHaveProperty('accessToken');
+    expect(res.body.user).toHaveProperty('email', testUser.email);
+  });
+
+  it('should not register with duplicate email', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send(testUser);
+    
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.message).toMatch(/already exists/);
+  });
+
+  it('should fail registration with invalid input', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'notanemail', password: 'short', name: '' });
+    
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('errors');
+  });
+
+  it('should login an existing user', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
+    
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('accessToken');
+    token = res.body.accessToken;
+    
+    // Check if refreshToken cookie is set
+    expect(res.headers['set-cookie']).toBeDefined();
+    expect(res.headers['set-cookie'][0]).toMatch(/refreshToken/);
+  });
+
+  it('should fail login with wrong password', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: testUser.email, password: 'wrongpassword' });
+    
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('should fail login with nonexistent user', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'nobody@example.com', password: 'password123' });
+    
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('should get current user profile with token', async () => {
+    const res = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${token}`);
+    
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.user).toHaveProperty('email', testUser.email);
+  });
+});

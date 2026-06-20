@@ -1,0 +1,79 @@
+/**
+ * @file
+ */
+import React from 'react';
+/** List of recent activities.
+ */
+
+
+import { useActivities } from '../../hooks/useActivities';
+import { ActivityCard } from './ActivityCard';
+
+/**
+ *
+ * @param root0
+ * @param root0.limit
+ * @param root0.showPagination
+ */
+export function ActivityList({ limit = 5, showPagination = false }) {
+  const [page, setPage] = React.useState(1);
+  const { data, isLoading, isError, deleteActivity } = useActivities(page, limit);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4" aria-busy="true">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="animate-pulse bg-white p-4 rounded-lg shadow-sm border border-gray-100 h-24"></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <p className="text-red-600">Failed to load activities.</p>;
+  }
+
+  const activities = data?.data || [];
+  const totalPages = data?.pagination?.pages || 1;
+
+  if (activities.length === 0) {
+    return (
+      <div className="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <p className="text-gray-500">No activities logged yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map(activity => (
+        <ActivityCard 
+          key={activity.id} 
+          activity={activity} 
+          onDelete={deleteActivity} 
+          onEdit={() => {}} 
+        />
+      ))}
+      
+      {showPagination && totalPages > 1 && (
+        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

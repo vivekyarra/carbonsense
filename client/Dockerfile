@@ -8,9 +8,6 @@ RUN npm install
 
 COPY . .
 
-# Accept the backend URL as an argument
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
 

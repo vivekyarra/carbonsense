@@ -39,4 +39,25 @@ describe('Common Components', () => {
       expect(screen.getByLabelText('Loading...')).toBeInTheDocument();
     });
   });
+  describe('ErrorBoundary', () => {
+    it('catches error and displays fallback UI', () => {
+      // Suppress console.error for this test as React logs errors when boundary catches them
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      
+      const ThrowError = () => {
+        throw new Error('Test error');
+      };
+
+      render(
+        <ErrorBoundary>
+          <ThrowError />
+        </ErrorBoundary>
+      );
+
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText('An unexpected error occurred in the application.')).toBeInTheDocument();
+      
+      consoleErrorSpy.mockRestore();
+    });
+  });
 });

@@ -72,7 +72,7 @@ export function ActivityForm({ onSuccess }) {
       reset();
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Failed to log activity:', error);
+      // Error is handled by UI toast
       alert('Failed to log activity. Please try again.');
     } finally {
       setIsSubmitting(false);

@@ -35,7 +35,8 @@ export class ErrorBoundary extends React.Component {
    * @param errorInfo
    */
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Error boundary caught an error
+    // Logger would go here in production
   }
 
   /**

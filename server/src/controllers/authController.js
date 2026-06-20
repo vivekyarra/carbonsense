@@ -49,7 +49,7 @@ async function register(req, res, next) {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -89,7 +89,7 @@ async function login(req, res, next) {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
@@ -129,7 +129,7 @@ function refresh(req, res) {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
@@ -165,10 +165,28 @@ function getMe(req, res) {
   res.json({ user: req.user });
 }
 
+/**
+ * Updates user daily target.
+ * @param {object} req - Express request.
+ * @param {object} res - Express response.
+ * @param {import('express').NextFunction} next - Next middleware.
+ * @returns {void}
+ */
+function updateTarget(req, res, next) {
+  try {
+    const { target } = req.body;
+    const updatedUser = require('../models/userModel').updateDailyTarget(req.user.id, target);
+    res.json({ message: 'Target updated', user: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
   refresh,
   logout,
-  getMe
+  getMe,
+  updateTarget
 };

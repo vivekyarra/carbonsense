@@ -55,7 +55,7 @@ export function CarbonScore({ todayData, targetKg = 10, isLoading }) {
       
       <div className="relative flex items-center justify-center" aria-label={`Carbon score: ${scoreData.total} kg CO2e`}>
         {/* Background circle */}
-        <svg className="w-40 h-40 transform -rotate-90">
+        <svg className="w-40 h-40 transform -rotate-90" aria-hidden="true" role="presentation">
           <circle
             className="text-gray-200 stroke-current"
             strokeWidth="8"

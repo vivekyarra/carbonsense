@@ -44,4 +44,12 @@ router.post('/logout', authController.logout);
 
 router.get('/me', authenticate, authController.getMe);
 
+router.put(
+  '/target',
+  authenticate,
+  [body('target').isFloat({ gt: 0 }).withMessage('Target must be positive')],
+  validate,
+  authController.updateTarget
+);
+
 module.exports = router;

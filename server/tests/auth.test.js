@@ -87,4 +87,44 @@ describe('Auth API', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.user).toHaveProperty('email', testUser.email);
   });
+
+  it('should refresh token using cookie', async () => {
+    // We need to login again to capture the cookie properly
+    const loginRes = await request(app)
+      .post('/api/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
+    
+    const cookie = loginRes.headers['set-cookie'];
+    
+    const res = await request(app)
+      .post('/api/auth/refresh')
+      .set('Cookie', cookie);
+      
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('accessToken');
+  });
+
+  it('should fail refresh if no token', async () => {
+    const res = await request(app).post('/api/auth/refresh');
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('should update daily target', async () => {
+    const res = await request(app)
+      .put('/api/auth/target')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ target: 15 });
+      
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.user).toHaveProperty('daily_target_kg', 15);
+  });
+
+  it('should logout user', async () => {
+    const res = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${token}`);
+      
+    expect(res.statusCode).toEqual(200);
+    expect(res.headers['set-cookie'][0]).toMatch(/Expires=Thu, 01 Jan 1970|Max-Age=0/);
+  });
 });

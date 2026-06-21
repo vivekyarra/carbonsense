@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 export function CommunityComparison({ stats, isLoading }) {
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-48 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true">
+      <div className="flex justify-center items-center h-48 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true" role="status">
         <div className="animate-pulse w-full p-6 space-y-4">
           <div className="h-4 bg-gray-200 rounded w-3/4"></div>
           <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -40,9 +40,9 @@ export function CommunityComparison({ stats, isLoading }) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 className="text-lg font-medium text-gray-800 mb-4">How You Compare</h3>
+      <h2 className="text-lg font-medium text-gray-800 mb-4">How You Compare</h2>
       
-      <div className="space-y-4" aria-label="Comparison bars showing your average against global and Paris targets">
+      <div className="space-y-4" role="img" aria-label="Comparison bars showing your average against global and Paris targets">
         {/* User */}
         <div>
           <div className="flex justify-between text-sm mb-1">

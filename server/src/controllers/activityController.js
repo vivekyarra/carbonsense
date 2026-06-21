@@ -3,7 +3,15 @@
  */
 
 const { calculateCO2 } = require('../services/carbonService');
-const { createActivity, getActivityById, getActivitiesByUser, updateActivity, deleteActivity } = require('../models/activityModel');
+const {
+  createActivity,
+  getActivityById,
+  getActivitiesByUser,
+  countActivitiesByUser,
+  updateActivity,
+  deleteActivity,
+} = require('../models/activityModel');
+const { invalidateDashboardCache } = require('../services/dashboardCache');
 
 /**
  * Logs a new activity.
@@ -29,6 +37,7 @@ function logActivity(req, res, next) {
       activity_date,
       notes: notes || null
     });
+    invalidateDashboardCache(userId);
 
     res.status(201).json({ message: 'Activity logged successfully', activity });
   } catch (error) {
@@ -50,13 +59,17 @@ function getActivities(req, res, next) {
     const limit = parseInt(req.query.limit, 10) || 20;
     const offset = (page - 1) * limit;
 
-    // A real implementation might return total count as well for pagination UI
     const activities = getActivitiesByUser(userId, limit, offset);
+    const total = countActivitiesByUser(userId);
 
     res.json({
-      page,
-      limit,
-      data: activities
+      data: activities,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.max(1, Math.ceil(total / limit)),
+      },
     });
   } catch (error) {
     next(error);
@@ -114,6 +127,7 @@ function updateActivityHandler(req, res, next) {
     }
 
     const updatedActivity = updateActivity(id, userId, updates);
+    invalidateDashboardCache(userId);
 
     res.json({ message: 'Activity updated', activity: updatedActivity });
   } catch (error) {
@@ -138,6 +152,7 @@ function deleteActivityHandler(req, res, next) {
     if (!success) {
       return res.status(404).json({ message: 'Activity not found' });
     }
+    invalidateDashboardCache(userId);
 
     res.json({ message: 'Activity deleted successfully' });
   } catch (error) {

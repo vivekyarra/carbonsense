@@ -10,25 +10,21 @@ const db = require('./db');
  * @param {string} userData.email - The user's email.
  * @param {string} userData.password_hash - The hashed password.
  * @param {string} userData.name - The user's name.
+ * @param {number} [userData.daily_target_kg] - Initial daily emissions target.
  * @returns {object} The created user object.
  */
-function createUser({ email, password_hash, name }) {
+function createUser({ email, password_hash, name, daily_target_kg = 10 }) {
   const stmt = db.prepare(`
-    INSERT INTO users (email, password_hash, name)
-    VALUES (?, ?, ?)
+    INSERT INTO users (email, password_hash, name, daily_target_kg)
+    VALUES (?, ?, ?, ?)
   `);
-  const result = stmt.run(email, password_hash, name);
+  const result = stmt.run(email, password_hash, name, daily_target_kg);
   return getUserById(result.lastInsertRowid);
 }
 
 /**
- * Retrieves a user by their email address.
- *
- * NOTE: This intentionally uses SELECT * to include password_hash,
- * which is required for bcrypt comparison during login/registration.
- * This function should ONLY be used in authentication flows.
- * For non-auth user lookups, use getUserById() which excludes password_hash.
- *
+ * Retrieves a user by email for authentication, including password_hash.
+ * Non-authentication flows must use getUserById(), which excludes the hash.
  * @param {string} email - The user's email.
  * @returns {object | undefined} The user object (including password_hash) or undefined if not found.
  */

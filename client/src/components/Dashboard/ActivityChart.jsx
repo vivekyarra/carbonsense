@@ -16,7 +16,7 @@ import { CATEGORIES } from '../../utils/constants';
 export function ActivityChart({ breakdown, isLoading }) {
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true">
+      <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true" role="status">
         <div className="animate-pulse flex space-x-4">
           <div className="rounded-full bg-gray-200 h-32 w-32"></div>
         </div>
@@ -33,7 +33,7 @@ export function ActivityChart({ breakdown, isLoading }) {
   if (data.length === 0) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 h-64 flex flex-col items-center justify-center">
-        <h3 className="text-lg font-medium text-gray-800 mb-2">Breakdown</h3>
+        <h2 className="text-lg font-medium text-gray-800 mb-2">Breakdown</h2>
         <p className="text-gray-500 text-sm">No data for today yet.</p>
       </div>
     );
@@ -41,9 +41,9 @@ export function ActivityChart({ breakdown, isLoading }) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 h-64 flex flex-col">
-      <h3 className="text-lg font-medium text-gray-800 mb-2">Breakdown</h3>
-      <div className="flex-1 min-h-0 relative" aria-label="Donut chart showing emissions by category">
-        <ResponsiveContainer width="100%" height="100%">
+      <h2 className="text-lg font-medium text-gray-800 mb-2">Breakdown</h2>
+      <div className="flex-1 min-h-0 min-w-0 w-full relative" role="img" aria-label="Donut chart showing emissions by category">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <PieChart>
             <Pie
               data={data}

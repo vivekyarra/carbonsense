@@ -19,7 +19,11 @@ beforeAll(() => {
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run(userId, 'transportation', 'car_petrol', 10, 'km', 1.92, new Date().toISOString().split('T')[0]);
   
-  token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: '15m',
+    audience: 'carbonsense-web',
+    issuer: 'carbonsense-api',
+  });
 });
 
 afterAll(() => {

@@ -20,7 +20,8 @@ export function ActivityList({ limit = 5, showPagination = false }) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4" aria-busy="true">
+      <div className="space-y-4" aria-busy="true" role="status">
+        <span className="sr-only">Loading activities</span>
         {[...Array(3)].map((_, i) => (
           <div key={i} className="animate-pulse bg-white p-4 rounded-lg shadow-sm border border-gray-100 h-24"></div>
         ))}
@@ -29,7 +30,7 @@ export function ActivityList({ limit = 5, showPagination = false }) {
   }
 
   if (isError) {
-    return <p className="text-red-600">Failed to load activities.</p>;
+    return <p className="text-red-700" role="alert">Failed to load activities.</p>;
   }
 
   const activities = data?.data || [];
@@ -55,11 +56,12 @@ export function ActivityList({ limit = 5, showPagination = false }) {
       ))}
       
       {showPagination && totalPages > 1 && (
-        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+        <nav className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200" aria-label="Activity pages">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
+            aria-label="Previous activity page"
           >
             Previous
           </button>
@@ -68,10 +70,11 @@ export function ActivityList({ limit = 5, showPagination = false }) {
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
+            aria-label="Next activity page"
           >
             Next
           </button>
-        </div>
+        </nav>
       )}
     </div>
   );

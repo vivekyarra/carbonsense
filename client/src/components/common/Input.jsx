@@ -3,7 +3,11 @@
  */
 
 import { forwardRef } from 'react';
+import PropTypes from 'prop-types';
 
+/**
+ * @description Labelled form input with an associated validation message.
+ */
 export const Input = forwardRef(({ 
   label, 
   id, 
@@ -26,12 +30,12 @@ export const Input = forwardRef(({
         className={`appearance-none block w-full px-3 py-2 border ${
           error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
         } rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm transition-colors duration-200`}
-        aria-invalid={error ? 'true' : 'false'}
+        aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
         {...props}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600" id={`${id}-error`}>
+        <p className="mt-1 text-sm text-red-700" id={`${id}-error`} role="alert">
           {error}
         </p>
       )}
@@ -40,3 +44,11 @@ export const Input = forwardRef(({
 });
 
 Input.displayName = 'Input';
+
+Input.propTypes = {
+  label: PropTypes.string,
+  id: PropTypes.string.isRequired,
+  type: PropTypes.string,
+  error: PropTypes.string,
+  className: PropTypes.string,
+};

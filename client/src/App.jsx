@@ -2,6 +2,7 @@
  * @file App.jsx
  */
 
+import { lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -10,19 +11,40 @@ import { useAuth } from './hooks/useAuth';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { Spinner } from './components/common/Spinner';
 
-// Layout
-import Layout from './components/Layout/Layout';
+const Layout = lazy(() => import('./components/Layout/Layout'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const LogActivity = lazy(() => import('./pages/LogActivity'));
+const History = lazy(() => import('./pages/History'));
+const Tips = lazy(() => import('./pages/Tips'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Pages
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import LogActivity from './pages/LogActivity';
-import History from './pages/History';
-import Tips from './pages/Tips';
-import NotFound from './pages/NotFound';
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
 
-const queryClient = new QueryClient();
+/**
+ * @description Full-page loading state used while route modules load.
+ * @returns {import('react').ReactNode} Accessible loading indicator.
+ */
+function RouteFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50" role="status">
+      <Spinner size="lg" />
+      <span className="sr-only">Loading page</span>
+    </div>
+  );
+}
 
 /**
  * @description Route wrapper that redirects unauthenticated users to login.
@@ -37,7 +59,7 @@ function ProtectedRoute({ children }) {
   }
   
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
   
   return children;
@@ -78,7 +100,9 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <AppContent />
+          <Suspense fallback={<RouteFallback />}>
+            <AppContent />
+          </Suspense>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

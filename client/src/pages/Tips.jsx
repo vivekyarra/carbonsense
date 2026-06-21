@@ -19,33 +19,47 @@ export default function Tips() {
       </div>
 
       <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+        <div className="-mb-px flex space-x-8" role="tablist" aria-label="Tip categories">
           <button
+            id="personalized-tab"
+            type="button"
+            role="tab"
+            aria-selected={tab === 'personalized'}
+            aria-controls="tips-panel"
             onClick={() => setTab('personalized')}
             className={`${
               tab === 'personalized'
                 ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            aria-current={tab === 'personalized' ? 'page' : undefined}
           >
             Personalized For You
           </button>
           <button
+            id="all-tab"
+            type="button"
+            role="tab"
+            aria-selected={tab === 'all'}
+            aria-controls="tips-panel"
             onClick={() => setTab('all')}
             className={`${
               tab === 'all'
                 ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            aria-current={tab === 'all' ? 'page' : undefined}
           >
             All Tips
           </button>
-        </nav>
+        </div>
       </div>
 
-      <TipsPanel personalized={tab === 'personalized'} />
+      <section
+        id="tips-panel"
+        role="tabpanel"
+        aria-labelledby={tab === 'personalized' ? 'personalized-tab' : 'all-tab'}
+      >
+        <TipsPanel personalized={tab === 'personalized'} />
+      </section>
     </div>
   );
 }

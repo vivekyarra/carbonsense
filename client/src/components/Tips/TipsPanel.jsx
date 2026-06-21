@@ -3,15 +3,16 @@
  */
 
 
+import PropTypes from 'prop-types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
 import { TipCard } from './TipCard';
 
 /**
- *
- * @param root0
- * @param root0.personalized
- * @param root0.limit
+ * @description Queries and renders personalized or general reduction tips.
+ * @param {object} props - Component properties.
+ * @param {boolean} [props.personalized] - Whether to prioritize relevant tips.
+ * @param {number|null} [props.limit] - Maximum number of tips.
  */
 export function TipsPanel({ personalized = false, limit = null }) {
   const queryClient = useQueryClient();
@@ -60,7 +61,7 @@ export function TipsPanel({ personalized = false, limit = null }) {
   }
 
   if (isError) {
-    return <p className="text-red-600">Failed to load tips.</p>;
+    return <p className="text-red-700" role="alert">Failed to load tips.</p>;
   }
 
   let displayTips = data || [];
@@ -85,3 +86,8 @@ export function TipsPanel({ personalized = false, limit = null }) {
     </div>
   );
 }
+
+TipsPanel.propTypes = {
+  personalized: PropTypes.bool,
+  limit: PropTypes.number,
+};

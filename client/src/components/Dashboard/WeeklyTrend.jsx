@@ -15,7 +15,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 export function WeeklyTrend({ data, isLoading }) {
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true">
+      <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true" role="status">
         <div className="animate-pulse w-full h-full p-6">
           <div className="h-full bg-gray-200 rounded"></div>
         </div>
@@ -34,9 +34,9 @@ export function WeeklyTrend({ data, isLoading }) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 h-64 flex flex-col">
-      <h3 className="text-lg font-medium text-gray-800 mb-4">7-Day Trend</h3>
-      <div className="flex-1 min-h-0 relative" aria-label="Bar chart showing emissions over the last 7 days">
-        <ResponsiveContainer width="100%" height="100%">
+      <h2 className="text-lg font-medium text-gray-800 mb-4">7-Day Trend</h2>
+      <div className="flex-1 min-h-0 min-w-0 w-full relative" role="img" aria-label="Bar chart showing emissions over the last 7 days">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
             <XAxis dataKey="displayDate" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />

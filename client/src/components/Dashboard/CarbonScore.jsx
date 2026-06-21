@@ -36,7 +36,7 @@ export function CarbonScore({ todayData, targetKg = 10, isLoading }) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-48 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true">
+      <div className="flex justify-center items-center h-48 bg-white rounded-lg shadow-sm border border-gray-100" aria-busy="true" role="status">
         <div className="animate-pulse flex flex-col items-center">
           <div className="w-32 h-32 bg-gray-200 rounded-full mb-4"></div>
           <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -52,9 +52,9 @@ export function CarbonScore({ todayData, targetKg = 10, isLoading }) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center justify-center">
-      <h3 className="text-lg font-medium text-gray-800 mb-2">Today's Footprint</h3>
+      <h2 className="text-lg font-medium text-gray-800 mb-2">Today's Footprint</h2>
       
-      <div className="relative flex items-center justify-center" aria-label={`Carbon score: ${scoreData.total} kg CO2e`}>
+      <div className="relative flex items-center justify-center" role="img" aria-label={`Carbon score: ${scoreData.total} kilograms of carbon dioxide equivalent`}>
         {/* Background circle */}
         <svg className="w-40 h-40 transform -rotate-90" aria-hidden="true" role="presentation">
           <circle

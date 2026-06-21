@@ -13,24 +13,28 @@ import { Button } from '../common/Button';
  * @description Top navigation bar with branding, user greeting, and logout action.
  * @param {object} props
  * @param {function(): void} props.onMenuClick - Callback invoked when the mobile menu button is clicked.
+ * @param {boolean} props.isMenuOpen - Whether the mobile navigation is open.
  */
-export function Navbar({ onMenuClick }) {
+export function Navbar({ onMenuClick, isMenuOpen }) {
   const { user, logout } = useAuth();
 
   return (
-    <nav className="bg-white border-b border-gray-200 fixed z-30 w-full">
+    <header className="bg-white border-b border-gray-200 fixed z-30 w-full">
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-start">
             <button
               onClick={onMenuClick}
-              aria-label="Toggle sidebar"
+              aria-label={isMenuOpen ? 'Close navigation' : 'Open navigation'}
+              aria-controls="sidebar"
+              aria-expanded={isMenuOpen}
+              type="button"
               className="lg:hidden mr-2 text-gray-600 hover:text-gray-900 cursor-pointer p-2 hover:bg-gray-100 focus:bg-gray-100 focus:ring-2 focus:ring-gray-100 rounded"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-6 h-6" aria-hidden="true" />
             </button>
             <Link to="/" className="text-xl font-bold flex items-center lg:ml-2.5">
-              <Leaf className="w-6 h-6 mr-2 text-green-600" />
+              <Leaf className="w-6 h-6 mr-2 text-green-700" aria-hidden="true" />
               <span className="self-center whitespace-nowrap text-green-700">CarbonSense</span>
             </Link>
           </div>
@@ -41,7 +45,7 @@ export function Navbar({ onMenuClick }) {
                   Hello, <span className="font-semibold">{user.name}</span>
                 </span>
                 <Button variant="ghost" onClick={logout} className="p-2 text-gray-600 hover:text-red-600" aria-label="Logout">
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-5 h-5" aria-hidden="true" />
                   <span className="hidden sm:inline-block ml-2">Logout</span>
                 </Button>
               </div>
@@ -49,10 +53,11 @@ export function Navbar({ onMenuClick }) {
           </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
 
 Navbar.propTypes = {
   onMenuClick: PropTypes.func.isRequired,
+  isMenuOpen: PropTypes.bool.isRequired,
 };

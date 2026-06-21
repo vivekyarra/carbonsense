@@ -50,6 +50,16 @@ function getActivitiesByUser(userId, limit = 20, offset = 0) {
 }
 
 /**
+ * Counts activities owned by a user.
+ * @param {number} userId - User ID.
+ * @returns {number} Total activity count.
+ */
+function countActivitiesByUser(userId) {
+  const stmt = db.prepare('SELECT COUNT(*) AS total FROM activities WHERE user_id = ?');
+  return stmt.get(userId).total;
+}
+
+/**
  * Updates an activity.
  * @param {number} id - The activity ID.
  * @param {number} userId - The user ID.
@@ -98,6 +108,7 @@ module.exports = {
   createActivity,
   getActivityById,
   getActivitiesByUser,
+  countActivitiesByUser,
   updateActivity,
   deleteActivity
 };

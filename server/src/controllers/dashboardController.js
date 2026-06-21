@@ -3,7 +3,7 @@
  */
 
 const db = require('../models/db');
-const NodeCache = require('node-cache');
+const { getDashboardCache, setDashboardCache } = require('../services/dashboardCache');
 
 /** @constant {number} Global average daily CO2 emissions per capita (kg). */
 const GLOBAL_AVERAGE_KG = 12.9;
@@ -15,13 +15,6 @@ const PARIS_AGREEMENT_KG = 5.5;
 const WEEKLY_DAYS = 7;
 /** @constant {number} Number of days in a month for trend calculation. */
 const MONTHLY_DAYS = 30;
-/** @constant {number} Cache time-to-live in seconds. */
-const CACHE_TTL_SECONDS = 300;
-/** @constant {number} Cache check period in seconds. */
-const CACHE_CHECK_PERIOD = 120;
-
-const dashboardCache = new NodeCache({ stdTTL: CACHE_TTL_SECONDS, checkperiod: CACHE_CHECK_PERIOD });
-
 /**
  * Gets today's carbon score and breakdown.
  * @param {object} req - Express request.
@@ -78,7 +71,7 @@ function getWeeklyTrend(req, res, next) {
     const userId = req.user.id;
     const cacheKey = `weekly_${userId}`;
 
-    const cachedData = dashboardCache.get(cacheKey);
+    const cachedData = getDashboardCache(cacheKey);
     if (cachedData) {
       return res.json(cachedData);
     }
@@ -113,7 +106,7 @@ function getWeeklyTrend(req, res, next) {
     }
 
     const responseData = { trend };
-    dashboardCache.set(cacheKey, responseData);
+    setDashboardCache(cacheKey, responseData);
 
     res.json(responseData);
   } catch (error) {
@@ -133,7 +126,7 @@ function getMonthlyTrend(req, res, next) {
     const userId = req.user.id;
     const cacheKey = `monthly_${userId}`;
 
-    const cachedData = dashboardCache.get(cacheKey);
+    const cachedData = getDashboardCache(cacheKey);
     if (cachedData) {
       return res.json(cachedData);
     }
@@ -168,7 +161,7 @@ function getMonthlyTrend(req, res, next) {
     }
 
     const responseData = { trend };
-    dashboardCache.set(cacheKey, responseData);
+    setDashboardCache(cacheKey, responseData);
 
     res.json(responseData);
   } catch (error) {

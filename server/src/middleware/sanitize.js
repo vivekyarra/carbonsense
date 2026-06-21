@@ -3,27 +3,28 @@
  */
 
 /**
- * Recursively sanitizes an object by removing keys starting with $ and trimming strings.
- * @param {any} obj - The object to sanitize.
- * @returns {any} The sanitized object.
+ * Recursively sanitizes request-body values by removing prototype-pollution
+ * keys and trimming strings.
+ * @param {unknown} value - Value to sanitize.
+ * @returns {unknown} Sanitized value.
  */
-function sanitizeInput(obj) {
-  if (typeof obj === 'string') {
-    return obj.trim();
+function sanitizeInput(value) {
+  if (typeof value === 'string') {
+    return value.trim();
   }
-  if (Array.isArray(obj)) {
-    return obj.map(sanitizeInput);
+  if (Array.isArray(value)) {
+    return value.map(sanitizeInput);
   }
-  if (obj && typeof obj === 'object') {
+  if (value && typeof value === 'object') {
     const sanitized = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (!key.startsWith('$')) {
-        sanitized[key] = sanitizeInput(value);
+    for (const [key, nestedValue] of Object.entries(value)) {
+      if (!key.startsWith('$') && !['__proto__', 'constructor', 'prototype'].includes(key)) {
+        sanitized[key] = sanitizeInput(nestedValue);
       }
     }
     return sanitized;
   }
-  return obj;
+  return value;
 }
 
 /**
@@ -33,10 +34,10 @@ function sanitizeInput(obj) {
  * @param {import('express').NextFunction} next - Next middleware.
  */
 function sanitizeMiddleware(req, res, next) {
-  if (req.body) req.body = sanitizeInput(req.body);
-  if (req.query) req.query = sanitizeInput(req.query);
-  if (req.params) req.params = sanitizeInput(req.params);
+  if (req.body) {
+    req.body = sanitizeInput(req.body);
+  }
   next();
 }
 
-module.exports = { sanitizeMiddleware };
+module.exports = { sanitizeInput, sanitizeMiddleware };

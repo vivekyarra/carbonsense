@@ -31,9 +31,9 @@ export function ActivityCard({ activity, onDelete }) {
           {category?.label.charAt(0) || '?'}
         </div>
         <div>
-          <h4 className="font-medium text-gray-900">{subcategory?.label || activity.subcategory}</h4>
+          <h2 className="font-medium text-gray-900">{subcategory?.label || activity.subcategory}</h2>
           <p className="text-sm text-gray-500">
-            {activity.quantity} {activity.unit} • {formatDate(activity.activity_date)}
+            {activity.quantity} {activity.unit} · {formatDate(activity.activity_date)}
           </p>
           {activity.notes && (
             <p className="text-xs text-gray-400 mt-1 italic">{activity.notes}</p>
@@ -52,8 +52,8 @@ export function ActivityCard({ activity, onDelete }) {
           {/* <Button variant="ghost" onClick={() => onEdit(activity)} className="p-1 text-gray-400 hover:text-blue-600" aria-label={`Edit ${subcategory?.label} activity`}>
             <Edit className="w-4 h-4" />
           </Button> */}
-          <Button variant="ghost" onClick={() => onDelete(activity.id)} className="p-1 text-gray-400 hover:text-red-600" aria-label={`Delete ${subcategory?.label} activity`}>
-            <Trash2 className="w-4 h-4" />
+          <Button variant="ghost" onClick={() => onDelete(activity.id)} className="p-2 text-gray-600 hover:text-red-700" aria-label={`Delete ${subcategory?.label || activity.subcategory} activity`}>
+            <Trash2 className="w-4 h-4" aria-hidden="true" />
           </Button>
         </div>
       </div>

@@ -2,13 +2,14 @@
  * @file Reusable Spinner component.
  */
 
-
+import PropTypes from 'prop-types';
 
 /**
- *
- * @param root0
- * @param root0.size
- * @param root0.className
+ * @description Accessible loading indicator.
+ * @param {object} props - Component properties.
+ * @param {'sm'|'md'|'lg'} [props.size] - Spinner size.
+ * @param {string} [props.className] - Additional classes.
+ * @returns {import('react').ReactNode} Loading indicator.
  */
 export function Spinner({ size = 'md', className = '' }) {
   const sizes = {
@@ -18,10 +19,15 @@ export function Spinner({ size = 'md', className = '' }) {
   };
 
   return (
-    <div className={`flex justify-center items-center ${className}`} aria-busy="true" aria-label="Loading...">
+    <div className={`flex justify-center items-center ${className}`} role="status" aria-label="Loading">
       <div
         className={`animate-spin rounded-full border-gray-300 border-t-green-600 ${sizes[size]}`}
       ></div>
     </div>
   );
 }
+
+Spinner.propTypes = {
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  className: PropTypes.string,
+};

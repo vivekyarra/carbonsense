@@ -3,6 +3,7 @@
  */
 
 
+import { Link } from 'react-router-dom';
 import { useDashboardData } from '../hooks/useCarbonScore';
 import { CarbonScore } from '../components/Dashboard/CarbonScore';
 import { ActivityChart } from '../components/Dashboard/ActivityChart';
@@ -24,7 +25,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-6">
-          <CarbonScore todayData={today} targetKg={stats?.user_daily_average_kg || 10} isLoading={isLoading} />
+          <CarbonScore todayData={today} targetKg={today?.target_kg || 10} isLoading={isLoading} />
           <ActivityChart breakdown={today?.breakdown} isLoading={isLoading} />
         </div>
         
@@ -36,8 +37,8 @@ export default function Dashboard() {
             
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col h-full">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-800">Recent Activities</h3>
-                <a href="/history" className="text-sm text-green-600 hover:text-green-700 font-medium">View All</a>
+                <h2 className="text-lg font-medium text-gray-800">Recent Activities</h2>
+                <Link to="/history" className="text-sm text-green-700 hover:text-green-800 font-medium underline-offset-2 hover:underline">View All</Link>
               </div>
               <div className="flex-1 overflow-y-auto pr-2">
                 <ActivityList limit={3} />

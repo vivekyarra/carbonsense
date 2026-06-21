@@ -8,7 +8,7 @@ const db = require('../models/db');
  * Sanitizes a CSV field to prevent CSV injection attacks.
  * Fields starting with =, +, -, @, \t, or \r are prepended with a single quote
  * to prevent spreadsheet formula injection.
- * @param {any} field - The field value to sanitize.
+ * @param {unknown} field - The field value to sanitize.
  * @returns {string} The sanitized, properly quoted CSV field.
  */
 function sanitizeCSVField(field) {

@@ -14,11 +14,11 @@ import { Leaf } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters')
+  password: z.string().min(8, 'Password must be at least 8 characters')
 });
 
 /**
- *
+ * @description Authentication page for existing users.
  */
 export default function Login() {
   const { login, user } = useAuth();
@@ -35,8 +35,8 @@ export default function Login() {
   }
 
   /**
-   *
-   * @param data
+   * @description Submits validated credentials.
+   * @param {{email: string, password: string}} data - Login form data.
    */
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -52,17 +52,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Leaf className="w-12 h-12 text-green-600" />
+          <Leaf className="w-12 h-12 text-green-700" aria-hidden="true" />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to CarbonSense
-        </h2>
+        </h1>
         <p className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
-          <Link to="/register" className="font-medium text-green-600 hover:text-green-500">
+          <Link to="/register" className="font-medium text-green-700 underline-offset-2 hover:underline">
             create a new account
           </Link>
         </p>
@@ -70,7 +70,7 @@ export default function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
             <Input
               label="Email address"
               id="email"
@@ -78,6 +78,7 @@ export default function Login() {
               {...register('email')}
               error={errors.email?.message}
               autoComplete="email"
+              inputMode="email"
             />
 
             <Input
@@ -90,10 +91,10 @@ export default function Login() {
             />
 
             {authError && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="rounded-md bg-red-50 p-4" role="alert" aria-live="assertive">
                 <div className="flex">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">{authError}</h3>
+                    <p className="text-sm font-medium text-red-800">{authError}</p>
                   </div>
                 </div>
               </div>
@@ -107,6 +108,6 @@ export default function Login() {
           </form>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

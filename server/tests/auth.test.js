@@ -1,7 +1,6 @@
 const request = require('supertest');
 const app = require('../src/app');
 const db = require('../src/models/db');
-const { createUser } = require('../src/models/userModel');
 
 // Ensure db is cleaned up
 beforeAll(() => {
@@ -10,7 +9,6 @@ beforeAll(() => {
 
 afterAll(() => {
   db.prepare('DELETE FROM users').run();
-  db.close();
 });
 
 describe('Auth API', () => {
@@ -18,7 +16,8 @@ describe('Auth API', () => {
   const testUser = {
     email: 'testauth@example.com',
     password: 'Password123!',
-    name: 'Test Auth User'
+    name: 'Test Auth User',
+    daily_target_kg: 12,
   };
 
   it('should register a new user', async () => {
@@ -29,6 +28,7 @@ describe('Auth API', () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('accessToken');
     expect(res.body.user).toHaveProperty('email', testUser.email);
+    expect(res.body.user).toHaveProperty('daily_target_kg', 12);
   });
 
   it('should not register with duplicate email', async () => {
@@ -61,6 +61,9 @@ describe('Auth API', () => {
     // Check if refreshToken cookie is set
     expect(res.headers['set-cookie']).toBeDefined();
     expect(res.headers['set-cookie'][0]).toMatch(/refreshToken/);
+    expect(res.headers['set-cookie'][0]).toMatch(/HttpOnly/);
+    expect(res.headers['set-cookie'][0]).toMatch(/SameSite=Strict/);
+    expect(res.headers['cache-control']).toBe('no-store');
   });
 
   it('should fail login with wrong password', async () => {
@@ -101,6 +104,28 @@ describe('Auth API', () => {
       .set('Cookie', cookie);
       
     expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('accessToken');
+  });
+
+  it('should return an anonymous session without an error response', async () => {
+    const res = await request(app).post('/api/auth/session');
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({ user: null });
+    expect(res.headers['cache-control']).toBe('no-store');
+  });
+
+  it('should restore a session using the refresh cookie', async () => {
+    const loginRes = await request(app)
+      .post('/api/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
+
+    const res = await request(app)
+      .post('/api/auth/session')
+      .set('Cookie', loginRes.headers['set-cookie']);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.user.email).toBe(testUser.email);
     expect(res.body).toHaveProperty('accessToken');
   });
 

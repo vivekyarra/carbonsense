@@ -3,14 +3,15 @@
  */
 
 
+import PropTypes from 'prop-types';
 import { BookmarkPlus, BookmarkCheck } from 'lucide-react';
 
 /**
- *
- * @param root0
- * @param root0.tip
- * @param root0.onToggleSave
- * @param root0.isSaved
+ * @description Displays a carbon-reduction tip and save action.
+ * @param {object} props - Component properties.
+ * @param {object} props.tip - Tip details.
+ * @param {function(object): void} props.onToggleSave - Save toggle callback.
+ * @param {boolean} props.isSaved - Current saved state.
  */
 export function TipCard({ tip, onToggleSave, isSaved }) {
   return (
@@ -24,11 +25,11 @@ export function TipCard({ tip, onToggleSave, isSaved }) {
           className={`p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 ${isSaved ? 'text-green-600' : 'text-gray-400'}`}
           aria-label={isSaved ? 'Unsave tip' : 'Save tip'}
         >
-          {isSaved ? <BookmarkCheck className="w-5 h-5" /> : <BookmarkPlus className="w-5 h-5" />}
+          {isSaved ? <BookmarkCheck className="w-5 h-5" aria-hidden="true" /> : <BookmarkPlus className="w-5 h-5" aria-hidden="true" />}
         </button>
       </div>
       
-      <h4 className="text-lg font-medium text-gray-900 mb-2">{tip.title}</h4>
+      <h2 className="text-lg font-medium text-gray-900 mb-2">{tip.title}</h2>
       <p className="text-sm text-gray-600 mb-4 flex-1">{tip.description}</p>
       
       <div className="mt-auto pt-4 border-t border-gray-100">
@@ -40,3 +41,15 @@ export function TipCard({ tip, onToggleSave, isSaved }) {
     </div>
   );
 }
+
+TipCard.propTypes = {
+  tip: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    category: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    potential_saving_kg: PropTypes.number.isRequired,
+  }).isRequired,
+  onToggleSave: PropTypes.func.isRequired,
+  isSaved: PropTypes.bool.isRequired,
+};

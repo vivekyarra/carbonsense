@@ -4,6 +4,7 @@
 
 const jwt = require('jsonwebtoken');
 const { getUserById } = require('../models/userModel');
+const { config } = require('../config/env');
 
 /**
  * Middleware to protect routes by verifying JWT access token.
@@ -22,7 +23,11 @@ function authenticate(req, res, next) {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwt.accessSecret, {
+      algorithms: ['HS256'],
+      audience: config.jwt.audience,
+      issuer: config.jwt.issuer,
+    });
     const user = getUserById(decoded.id);
 
     if (!user) {

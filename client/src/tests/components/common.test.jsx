@@ -36,7 +36,7 @@ describe('Common Components', () => {
   describe('Spinner', () => {
     it('renders', () => {
       render(<Spinner />);
-      expect(screen.getByLabelText('Loading...')).toBeInTheDocument();
+      expect(screen.getByLabelText('Loading')).toBeInTheDocument();
     });
   });
   describe('ErrorBoundary', () => {

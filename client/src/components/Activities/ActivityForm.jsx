@@ -30,6 +30,7 @@ const activitySchema = z.object({
 export function ActivityForm({ onSuccess }) {
   const [co2Estimate, setCo2Estimate] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const { register, handleSubmit, watch, formState: { errors }, reset } = useForm({
     resolver: zodResolver(activitySchema),
@@ -61,6 +62,7 @@ export function ActivityForm({ onSuccess }) {
    */
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+    setSubmitError('');
     try {
       // Find unit
       const selectedSub = SUBCATEGORIES[data.category]?.find(s => s.id === data.subcategory);
@@ -73,8 +75,7 @@ export function ActivityForm({ onSuccess }) {
       reset();
       if (onSuccess) onSuccess();
     } catch {
-      // Error is handled by UI toast
-      alert('Failed to log activity. Please try again.');
+      setSubmitError('Failed to log activity. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -83,14 +84,16 @@ export function ActivityForm({ onSuccess }) {
   const subOptions = category ? SUBCATEGORIES[category] : [];
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Log New Activity</h3>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200" noValidate>
+      <h2 className="text-lg font-medium text-gray-900 mb-4">Log New Activity</h2>
       
       <div>
         <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
         <select
           id="category"
           {...register('category')}
+          aria-invalid={Boolean(errors.category)}
+          aria-describedby={errors.category ? 'category-error' : undefined}
           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
         >
           <option value="">Select a category</option>
@@ -98,7 +101,7 @@ export function ActivityForm({ onSuccess }) {
             <option key={c.id} value={c.id}>{c.label}</option>
           ))}
         </select>
-        {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
+        {errors.category && <p id="category-error" className="mt-1 text-sm text-red-700" role="alert">{errors.category.message}</p>}
       </div>
 
       <div>
@@ -107,6 +110,8 @@ export function ActivityForm({ onSuccess }) {
           id="subcategory"
           {...register('subcategory')}
           disabled={!category}
+          aria-invalid={Boolean(errors.subcategory)}
+          aria-describedby={errors.subcategory ? 'subcategory-error' : undefined}
           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md disabled:bg-gray-100"
         >
           <option value="">Select an activity</option>
@@ -114,7 +119,7 @@ export function ActivityForm({ onSuccess }) {
             <option key={s.id} value={s.id}>{s.label}</option>
           ))}
         </select>
-        {errors.subcategory && <p className="mt-1 text-sm text-red-600">{errors.subcategory.message}</p>}
+        {errors.subcategory && <p id="subcategory-error" className="mt-1 text-sm text-red-700" role="alert">{errors.subcategory.message}</p>}
       </div>
 
       <Input
@@ -122,6 +127,7 @@ export function ActivityForm({ onSuccess }) {
         id="quantity"
         type="number"
         step="any"
+        min="0.01"
         {...register('quantity', { valueAsNumber: true })}
         error={errors.quantity?.message}
       />
@@ -142,11 +148,17 @@ export function ActivityForm({ onSuccess }) {
       />
 
       {co2Estimate > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-4">
+        <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-4" role="status" aria-live="polite">
           <p className="text-sm text-green-800">
             Estimated Impact: <span className="font-bold text-lg">{co2Estimate} kg CO2e</span>
           </p>
         </div>
+      )}
+
+      {submitError && (
+        <p className="rounded-md bg-red-50 p-3 text-sm text-red-800" role="alert">
+          {submitError}
+        </p>
       )}
 
       <Button type="submit" disabled={isSubmitting} className="w-full">

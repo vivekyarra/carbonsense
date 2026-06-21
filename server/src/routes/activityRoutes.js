@@ -16,11 +16,11 @@ router.post(
   '/',
   [
     body('category').isIn(['transportation', 'food', 'energy']).withMessage('Invalid category'),
-    body('subcategory').notEmpty().withMessage('Subcategory is required').escape(),
+    body('subcategory').trim().isLength({ min: 1, max: 80 }).withMessage('Subcategory is required'),
     body('quantity').isFloat({ gt: 0 }).withMessage('Quantity must be positive'),
-    body('unit').notEmpty().withMessage('Unit is required').escape(),
+    body('unit').trim().isLength({ min: 1, max: 20 }).withMessage('Unit is required'),
     body('activity_date').isISO8601().withMessage('Valid date is required'),
-    body('notes').optional().isString().escape()
+    body('notes').optional().trim().isLength({ max: 500 }).withMessage('Notes must not exceed 500 characters')
   ],
   validate,
   activityController.logActivity
@@ -48,11 +48,11 @@ router.put(
   [
     param('id').isInt().withMessage('Invalid ID'),
     body('category').optional().isIn(['transportation', 'food', 'energy']).withMessage('Invalid category'),
-    body('subcategory').optional().notEmpty().escape(),
+    body('subcategory').optional().trim().isLength({ min: 1, max: 80 }),
     body('quantity').optional().isFloat({ gt: 0 }).withMessage('Quantity must be positive'),
-    body('unit').optional().notEmpty().escape(),
+    body('unit').optional().trim().isLength({ min: 1, max: 20 }),
     body('activity_date').optional().isISO8601().withMessage('Valid date required'),
-    body('notes').optional().isString().escape()
+    body('notes').optional().trim().isLength({ max: 500 })
   ],
   validate,
   activityController.updateActivityHandler

@@ -4,7 +4,7 @@
 
 /**
  * Application error with HTTP status code.
- * @extends Error
+ * @augments Error
  */
 class AppError extends Error {
   /**

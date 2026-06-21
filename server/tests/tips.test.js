@@ -17,7 +17,11 @@ beforeAll(() => {
   db.prepare('INSERT INTO tips (category, title, description, potential_saving_kg) VALUES (?, ?, ?, ?)').run('transportation', 'Tip 1', 'Desc 1', 5);
   db.prepare('INSERT INTO tips (category, title, description, potential_saving_kg) VALUES (?, ?, ?, ?)').run('food', 'Tip 2', 'Desc 2', 2);
   
-  token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: '15m',
+    audience: 'carbonsense-web',
+    issuer: 'carbonsense-api',
+  });
 });
 
 afterAll(() => {

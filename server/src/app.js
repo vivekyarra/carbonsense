@@ -11,6 +11,9 @@ const { rateLimiter } = require('./middleware/rateLimiter');
 const { errorHandler } = require('./middleware/errorHandler');
 const { requestId } = require('./middleware/requestId');
 const { sanitizeMiddleware } = require('./middleware/sanitize');
+const { notFound } = require('./middleware/notFound');
+const { config } = require('./config/env');
+const { AppError } = require('./utils/AppError');
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -48,7 +51,6 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
 app.use(cors({
   /**
    * CORS origin check function.
@@ -56,10 +58,10 @@ app.use(cors({
    * @param {import('express').NextFunction} callback - The callback function.
    */
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || config.allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new AppError('Origin is not allowed', 403));
     }
   },
   credentials: true,
@@ -79,12 +81,26 @@ app.use(sanitizeMiddleware);
 // General Rate Limiting
 app.use('/api', rateLimiter);
 
+/**
+ * Returns service health for deployment probes.
+ * @param {import('express').Request} req - Express request.
+ * @param {import('express').Response} res - Express response.
+ * @returns {void}
+ */
+function health(req, res) {
+  res.json({ status: 'ok', requestId: req.id });
+}
+
+app.get('/health', health);
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/tips', tipsRoutes);
 app.use('/api/export', exportRoutes);
+
+app.use(notFound);
 
 // Error Handling Middleware (must be last)
 app.use(errorHandler);

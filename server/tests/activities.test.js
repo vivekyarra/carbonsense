@@ -14,7 +14,11 @@ beforeAll(() => {
   const res = db.prepare('INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)').run('activity@example.com', 'hash', 'Activity User');
   userId = res.lastInsertRowid;
   
-  token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: '15m',
+    audience: 'carbonsense-web',
+    issuer: 'carbonsense-api',
+  });
 });
 
 afterAll(() => {
@@ -78,6 +82,12 @@ describe('Activities API', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.data).toBeInstanceOf(Array);
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.pagination).toEqual({
+      page: 1,
+      limit: 10,
+      total: expect.any(Number),
+      pages: 1,
+    });
   });
 
   it('should get a single activity', async () => {

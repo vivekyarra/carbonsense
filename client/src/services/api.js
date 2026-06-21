@@ -16,10 +16,15 @@ if (apiBaseUrl && !/^https?:\/\/.+/i.test(apiBaseUrl)) {
 
 const api = axios.create({
   baseURL: apiBaseUrl,
-  withCredentials: true // send cookies
+  timeout: 10_000,
+  withCredentials: true,
+  headers: {
+    Accept: 'application/json',
+  },
 });
 
 let inMemoryToken = null;
+let refreshPromise = null;
 
 /**
  * @description Stores the JWT access token in memory.
@@ -53,19 +58,29 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     
     // If error is 401 and we haven't already tried refreshing
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
-        // Attempt to refresh the token using the httpOnly cookie
-        const res = await axios.post(`${apiBaseUrl}/auth/refresh`, {}, {
-          withCredentials: true
-        });
+        if (!refreshPromise) {
+          refreshPromise = axios
+            .post(`${apiBaseUrl}/auth/refresh`, {}, {
+              timeout: 10_000,
+              withCredentials: true,
+              headers: { Accept: 'application/json' },
+            })
+            .finally(() => {
+              refreshPromise = null;
+            });
+        }
+
+        const res = await refreshPromise;
         
         if (res.data.accessToken) {
           // Save new token
           setToken(res.data.accessToken);
           // Update authorization header
+          originalRequest.headers = originalRequest.headers || {};
           originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
           // Retry original request
           return api(originalRequest);

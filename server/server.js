@@ -1,16 +1,17 @@
 /**
- * @fileoverview Server entry point.
+ * @file Server entry point.
  */
 
 require('dotenv').config();
 const app = require('./src/app');
 const logger = require('./src/utils/logger');
 const db = require('./src/models/db');
+const { config, validateAuthenticationConfig } = require('./src/config/env');
 
-const PORT = process.env.PORT || 5000;
+validateAuthenticationConfig();
 
-const server = app.listen(PORT, () => {
-  logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+const server = app.listen(config.port, () => {
+  logger.info(`Server running in ${config.nodeEnv} mode on port ${config.port}`);
 });
 
 // Handle graceful shutdown

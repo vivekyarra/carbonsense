@@ -5,6 +5,14 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { createUser, getUserByEmail, getUserById, updateDailyTarget } = require('../models/userModel');
+const { config } = require('../config/env');
+const { REFRESH_COOKIE_NAME, refreshCookieOptions } = require('../config/cookies');
+
+const TOKEN_OPTIONS = Object.freeze({
+  algorithm: 'HS256',
+  audience: config.jwt.audience,
+  issuer: config.jwt.issuer,
+});
 
 /**
  * Generates JWT tokens for a user.
@@ -12,15 +20,53 @@ const { createUser, getUserByEmail, getUserById, updateDailyTarget } = require('
  * @returns {object} The access and refresh tokens.
  */
 function generateTokens(userId) {
-  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '15m'
+  const accessToken = jwt.sign({ id: userId }, config.jwt.accessSecret, {
+    ...TOKEN_OPTIONS,
+    expiresIn: config.jwt.accessExpiresIn,
   });
 
-  const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
+  const refreshToken = jwt.sign({ id: userId }, config.jwt.refreshSecret, {
+    ...TOKEN_OPTIONS,
+    expiresIn: config.jwt.refreshExpiresIn,
   });
 
   return { accessToken, refreshToken };
+}
+
+/**
+ * Sets the rotating refresh token using the shared cookie policy.
+ * @param {import('express').Response} res - Express response.
+ * @param {string} refreshToken - Signed refresh token.
+ * @returns {void}
+ */
+function setRefreshCookie(res, refreshToken) {
+  res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions());
+  res.set('Cache-Control', 'no-store');
+}
+
+/**
+ * Clears the refresh token using the same scope as the set operation.
+ * @param {import('express').Response} res - Express response.
+ * @returns {void}
+ */
+function clearRefreshCookie(res) {
+  const clearOptions = refreshCookieOptions();
+  delete clearOptions.maxAge;
+  res.clearCookie(REFRESH_COOKIE_NAME, clearOptions);
+}
+
+/**
+ * Verifies a refresh token and resolves its current user.
+ * @param {string} refreshToken - Signed refresh token.
+ * @returns {object | undefined} Current user when the token is valid.
+ */
+function getRefreshTokenUser(refreshToken) {
+  const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret, {
+    algorithms: ['HS256'],
+    audience: config.jwt.audience,
+    issuer: config.jwt.issuer,
+  });
+  return getUserById(decoded.id);
 }
 
 /**
@@ -32,7 +78,7 @@ function generateTokens(userId) {
  */
 async function register(req, res, next) {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, daily_target_kg } = req.body;
 
     const existingUser = getUserByEmail(email);
     if (existingUser) {
@@ -42,16 +88,11 @@ async function register(req, res, next) {
     const salt = await bcrypt.genSalt(12);
     const password_hash = await bcrypt.hash(password, salt);
 
-    const user = createUser({ email, password_hash, name });
+    const user = createUser({ email, password_hash, name, daily_target_kg });
     const { accessToken, refreshToken } = generateTokens(user.id);
 
     // Send refresh token as httpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    setRefreshCookie(res, refreshToken);
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -86,12 +127,7 @@ async function login(req, res, next) {
 
     const { accessToken, refreshToken } = generateTokens(user.id);
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    setRefreshCookie(res, refreshToken);
 
     res.json({
       message: 'Login successful',
@@ -111,14 +147,13 @@ async function login(req, res, next) {
  */
 function refresh(req, res) {
   try {
-    const { refreshToken } = req.cookies;
+    const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
 
     if (!refreshToken) {
       return res.status(401).json({ message: 'Refresh token not found' });
     }
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const user = getUserById(decoded.id);
+    const user = getRefreshTokenUser(refreshToken);
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
@@ -126,16 +161,43 @@ function refresh(req, res) {
 
     const tokens = generateTokens(user.id);
 
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    setRefreshCookie(res, tokens.refreshToken);
 
     res.json({ accessToken: tokens.accessToken });
   } catch {
     res.status(401).json({ message: 'Invalid or expired refresh token' });
+  }
+}
+
+/**
+ * Restores a browser session without producing expected authorization errors
+ * for signed-out visitors.
+ * @param {import('express').Request} req - Express request.
+ * @param {import('express').Response} res - Express response.
+ * @returns {void}
+ */
+function session(req, res) {
+  const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
+  if (!refreshToken) {
+    res.set('Cache-Control', 'no-store');
+    res.json({ user: null });
+    return;
+  }
+
+  try {
+    const user = getRefreshTokenUser(refreshToken);
+    if (!user) {
+      clearRefreshCookie(res);
+      res.json({ user: null });
+      return;
+    }
+
+    const tokens = generateTokens(user.id);
+    setRefreshCookie(res, tokens.refreshToken);
+    res.json({ user, accessToken: tokens.accessToken });
+  } catch {
+    clearRefreshCookie(res);
+    res.json({ user: null });
   }
 }
 
@@ -148,7 +210,7 @@ function refresh(req, res) {
  */
 function logout(req, res, next) {
   try {
-    res.clearCookie('refreshToken');
+    clearRefreshCookie(res);
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
     next(error);
@@ -185,6 +247,7 @@ function updateTarget(req, res, next) {
 module.exports = {
   register,
   login,
+  session,
   refresh,
   logout,
   getMe,

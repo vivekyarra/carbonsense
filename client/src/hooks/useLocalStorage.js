@@ -6,9 +6,10 @@ import { useState, useEffect } from 'react';
 
 /**
  * Hook to persist state in localStorage.
- * @param {string} key 
- * @param {any} initialValue 
- * @returns {[any, function(any): void]}
+ * @template T
+ * @param {string} key - Storage key.
+ * @param {T} initialValue - Fallback value.
+ * @returns {[T, import('react').Dispatch<import('react').SetStateAction<T>>]} Stored value and setter.
  */
 export function useLocalStorage(key, initialValue) {
   const [storedValue, setStoredValue] = useState(() => {

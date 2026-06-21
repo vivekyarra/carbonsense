@@ -1,20 +1,16 @@
 /**
- * @file
+ * @file Error boundary component to catch React rendering errors.
  */
+
 import React from 'react';
-/** Error boundary component to catch React rendering errors.
- */
-
-
 import { Button } from './Button';
 
 /**
- *
+ * @description Catches JavaScript errors anywhere in their child component tree, logs those errors, and displays a fallback UI.
  */
 export class ErrorBoundary extends React.Component {
   /**
-   *
-   * @param props
+   * @param {object} props
    */
   constructor(props) {
     super(props);
@@ -22,25 +18,22 @@ export class ErrorBoundary extends React.Component {
   }
 
   /**
-   *
-   * @param error
+   * @param {Error} error
    */
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
 
   /**
-   *
-   * @param error
-   * @param errorInfo
+   * @description Lifecycle method invoked after an error has been thrown by a descendant component.
    */
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch() {
     // Error boundary caught an error
     // Logger would go here in production
   }
 
   /**
-   *
+   * @returns {import('react').ReactNode} The rendered children or the error UI.
    */
   render() {
     if (this.state.hasError) {

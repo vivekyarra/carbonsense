@@ -3,14 +3,15 @@
  */
 
 
+import PropTypes from 'prop-types';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { CATEGORIES } from '../../utils/constants';
 
 /**
- *
- * @param root0
- * @param root0.breakdown
- * @param root0.isLoading
+ * @description Donut chart showing emissions breakdown by category for today.
+ * @param {object} props
+ * @param {object} [props.breakdown] - Object with category emission totals (transportation, food, energy).
+ * @param {boolean} props.isLoading - Whether the data is still loading.
  */
 export function ActivityChart({ breakdown, isLoading }) {
   if (isLoading) {
@@ -69,3 +70,12 @@ export function ActivityChart({ breakdown, isLoading }) {
     </div>
   );
 }
+
+ActivityChart.propTypes = {
+  breakdown: PropTypes.shape({
+    transportation: PropTypes.number,
+    food: PropTypes.number,
+    energy: PropTypes.number,
+  }),
+  isLoading: PropTypes.bool.isRequired,
+};

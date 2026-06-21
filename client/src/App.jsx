@@ -2,6 +2,7 @@
  * @file App.jsx
  */
 
+import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
@@ -23,11 +24,10 @@ import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper
 /**
- *
- * @param root0
- * @param root0.children
+ * @description Route wrapper that redirects unauthenticated users to login.
+ * @param {object} props
+ * @param {import('react').ReactNode} props.children - Child components to render when authenticated.
  */
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -43,8 +43,12 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 /**
- *
+ * @description Main application content with route definitions.
  */
 function AppContent() {
   return (
@@ -67,7 +71,7 @@ function AppContent() {
 }
 
 /**
- *
+ * @description Root application component with providers and error boundary.
  */
 function App() {
   return (

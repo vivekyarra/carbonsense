@@ -9,18 +9,14 @@ const { authenticate } = require('../middleware/authenticate');
 const { authRateLimiter } = require('../middleware/rateLimiter');
 const authController = require('../controllers/authController');
 
-// Parse cookies to get refresh token
-const cookieParser = require('cookie-parser');
-
 const router = express.Router();
-router.use(cookieParser());
 
 router.post(
   '/register',
   authRateLimiter,
   [
     body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long').matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain uppercase, lowercase, and a number'),
     body('name').trim().notEmpty().withMessage('Name is required').escape(),
   ],
   validate,

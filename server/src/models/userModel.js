@@ -23,10 +23,17 @@ function createUser({ email, password_hash, name }) {
 
 /**
  * Retrieves a user by their email address.
+ *
+ * NOTE: This intentionally uses SELECT * to include password_hash,
+ * which is required for bcrypt comparison during login/registration.
+ * This function should ONLY be used in authentication flows.
+ * For non-auth user lookups, use getUserById() which excludes password_hash.
+ *
  * @param {string} email - The user's email.
- * @returns {object | undefined} The user object or undefined if not found.
+ * @returns {object | undefined} The user object (including password_hash) or undefined if not found.
  */
 function getUserByEmail(email) {
+  // SELECT * is intentional here - password_hash is needed for auth verification
   const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
   return stmt.get(email);
 }

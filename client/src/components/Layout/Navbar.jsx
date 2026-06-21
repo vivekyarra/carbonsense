@@ -3,15 +3,16 @@
  */
 
 
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Leaf, LogOut, Menu } from 'lucide-react';
 import { Button } from '../common/Button';
 
 /**
- *
- * @param root0
- * @param root0.onMenuClick
+ * @description Top navigation bar with branding, user greeting, and logout action.
+ * @param {object} props
+ * @param {function(): void} props.onMenuClick - Callback invoked when the mobile menu button is clicked.
  */
 export function Navbar({ onMenuClick }) {
   const { user, logout } = useAuth();
@@ -51,3 +52,7 @@ export function Navbar({ onMenuClick }) {
     </nav>
   );
 }
+
+Navbar.propTypes = {
+  onMenuClick: PropTypes.func.isRequired,
+};

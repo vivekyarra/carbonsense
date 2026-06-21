@@ -4,6 +4,7 @@
 
 /* eslint-disable react-hooks/incompatible-library */
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,9 +23,9 @@ const activitySchema = z.object({
 });
 
 /**
- *
- * @param root0
- * @param root0.onSuccess
+ * @description Form component for logging a new carbon-emitting activity.
+ * @param {object} props
+ * @param {function(): void} [props.onSuccess] - Callback invoked after a successful activity submission.
  */
 export function ActivityForm({ onSuccess }) {
   const [co2Estimate, setCo2Estimate] = useState(0);
@@ -55,8 +56,8 @@ export function ActivityForm({ onSuccess }) {
   }, [category, subcategory, quantity]);
 
   /**
-   *
-   * @param data
+   * @description Validates and submits a new activity to the API.
+   * @param {object} data - Form data from react-hook-form.
    */
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -71,7 +72,7 @@ export function ActivityForm({ onSuccess }) {
       await api.post('/activities', payload);
       reset();
       if (onSuccess) onSuccess();
-    } catch (error) {
+    } catch {
       // Error is handled by UI toast
       alert('Failed to log activity. Please try again.');
     } finally {
@@ -154,3 +155,7 @@ export function ActivityForm({ onSuccess }) {
     </form>
   );
 }
+
+ActivityForm.propTypes = {
+  onSuccess: PropTypes.func,
+};

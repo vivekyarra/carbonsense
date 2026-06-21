@@ -4,7 +4,7 @@
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { createUser, getUserByEmail, getUserById } = require('../models/userModel');
+const { createUser, getUserByEmail, getUserById, updateDailyTarget } = require('../models/userModel');
 
 /**
  * Generates JWT tokens for a user.
@@ -16,7 +16,7 @@ function generateTokens(userId) {
     expiresIn: process.env.JWT_EXPIRES_IN || '15m'
   });
 
-  const refreshToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+  const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   });
 
@@ -117,7 +117,7 @@ function refresh(req, res) {
       return res.status(401).json({ message: 'Refresh token not found' });
     }
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = getUserById(decoded.id);
 
     if (!user) {
@@ -175,7 +175,7 @@ function getMe(req, res) {
 function updateTarget(req, res, next) {
   try {
     const { target } = req.body;
-    const updatedUser = require('../models/userModel').updateDailyTarget(req.user.id, target);
+    const updatedUser = updateDailyTarget(req.user.id, target);
     res.json({ message: 'Target updated', user: updatedUser });
   } catch (error) {
     next(error);

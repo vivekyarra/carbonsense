@@ -3,13 +3,14 @@
  */
 
 import { useMemo } from 'react';
+import PropTypes from 'prop-types';
 
 /**
- *
- * @param root0
- * @param root0.todayData
- * @param root0.targetKg
- * @param root0.isLoading
+ * @description Circular gauge displaying today's total CO2 emissions against a daily target.
+ * @param {object} props
+ * @param {object} [props.todayData] - Today's emission data with total_kg.
+ * @param {number} [props.targetKg] - Daily emission target in kilograms.
+ * @param {boolean} props.isLoading - Whether the data is still loading.
  */
 export function CarbonScore({ todayData, targetKg = 10, isLoading }) {
   
@@ -100,3 +101,11 @@ export function CarbonScore({ todayData, targetKg = 10, isLoading }) {
     </div>
   );
 }
+
+CarbonScore.propTypes = {
+  todayData: PropTypes.shape({
+    total_kg: PropTypes.number,
+  }),
+  targetKg: PropTypes.number,
+  isLoading: PropTypes.bool.isRequired,
+};

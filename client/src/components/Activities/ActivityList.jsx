@@ -1,19 +1,18 @@
 /**
- * @file
+ * @file List of recent activities.
  */
 import React from 'react';
-/** List of recent activities.
- */
+import PropTypes from 'prop-types';
 
 
 import { useActivities } from '../../hooks/useActivities';
 import { ActivityCard } from './ActivityCard';
 
 /**
- *
- * @param root0
- * @param root0.limit
- * @param root0.showPagination
+ * @description Renders a paginated list of activity cards with loading/error states.
+ * @param {object} props
+ * @param {number} [props.limit] - Maximum number of activities per page.
+ * @param {boolean} [props.showPagination] - Whether to show pagination controls.
  */
 export function ActivityList({ limit = 5, showPagination = false }) {
   const [page, setPage] = React.useState(1);
@@ -77,3 +76,8 @@ export function ActivityList({ limit = 5, showPagination = false }) {
     </div>
   );
 }
+
+ActivityList.propTypes = {
+  limit: PropTypes.number,
+  showPagination: PropTypes.bool,
+};

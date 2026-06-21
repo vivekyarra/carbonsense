@@ -68,13 +68,13 @@ function updateActivity(id, userId, updates) {
   `);
   
   stmt.run(
-    updates.category || current.category,
-    updates.subcategory || current.subcategory,
-    updates.quantity || current.quantity,
-    updates.unit || current.unit,
-    updates.co2_kg !== undefined ? updates.co2_kg : current.co2_kg,
-    updates.activity_date || current.activity_date,
-    updates.notes || current.notes,
+    updates.category ?? current.category,
+    updates.subcategory ?? current.subcategory,
+    updates.quantity ?? current.quantity,
+    updates.unit ?? current.unit,
+    updates.co2_kg ?? current.co2_kg,
+    updates.activity_date ?? current.activity_date,
+    updates.notes ?? current.notes,
     id,
     userId
   );

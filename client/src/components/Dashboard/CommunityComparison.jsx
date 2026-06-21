@@ -3,12 +3,13 @@
  */
 
 
+import PropTypes from 'prop-types';
 
 /**
- *
- * @param root0
- * @param root0.stats
- * @param root0.isLoading
+ * @description Horizontal bar comparison showing user's daily average vs global average and Paris Agreement target.
+ * @param {object} props
+ * @param {object} [props.stats] - Dashboard stats containing user average and comparison data.
+ * @param {boolean} props.isLoading - Whether the data is still loading.
  */
 export function CommunityComparison({ stats, isLoading }) {
   if (isLoading) {
@@ -31,8 +32,9 @@ export function CommunityComparison({ stats, isLoading }) {
   const maxVal = Math.max(userAvg, globalAvg, parisTarget) * 1.1;
 
   /**
-   *
-   * @param val
+   * @description Calculates percentage width for a comparison bar.
+   * @param {number} val - The value to calculate width for.
+   * @returns {string} CSS percentage width string.
    */
   const getBarWidth = (val) => `${(val / maxVal) * 100}%`;
 
@@ -84,3 +86,14 @@ export function CommunityComparison({ stats, isLoading }) {
     </div>
   );
 }
+
+CommunityComparison.propTypes = {
+  stats: PropTypes.shape({
+    user_daily_average_kg: PropTypes.number,
+    comparisons: PropTypes.shape({
+      global_average_kg: PropTypes.number,
+      paris_agreement_kg: PropTypes.number,
+    }),
+  }),
+  isLoading: PropTypes.bool.isRequired,
+};

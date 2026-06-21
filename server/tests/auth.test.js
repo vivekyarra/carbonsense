@@ -17,7 +17,7 @@ describe('Auth API', () => {
   let token;
   const testUser = {
     email: 'testauth@example.com',
-    password: 'password123',
+    password: 'Password123!',
     name: 'Test Auth User'
   };
 
@@ -74,7 +74,7 @@ describe('Auth API', () => {
   it('should fail login with nonexistent user', async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'nobody@example.com', password: 'password123' });
+      .send({ email: 'nobody@example.com', password: 'Password123!' });
     
     expect(res.statusCode).toEqual(401);
   });

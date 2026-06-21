@@ -3,16 +3,17 @@
  */
 
 
+import PropTypes from 'prop-types';
 import { CATEGORIES, SUBCATEGORIES } from '../../utils/constants';
 import { formatDate } from '../../utils/formatters';
 import { Trash2 } from 'lucide-react';
 import { Button } from '../common/Button';
 
 /**
- *
- * @param root0
- * @param root0.activity
- * @param root0.onDelete
+ * @description Displays a single activity entry with category, emissions, date, and delete action.
+ * @param {object} props
+ * @param {object} props.activity - The activity data object.
+ * @param {function(string|number): void} props.onDelete - Callback invoked with activity ID when delete is clicked.
  */
 export function ActivityCard({ activity, onDelete }) {
   const category = CATEGORIES.find(c => c.id === activity.category);
@@ -59,3 +60,17 @@ export function ActivityCard({ activity, onDelete }) {
     </div>
   );
 }
+
+ActivityCard.propTypes = {
+  activity: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    category: PropTypes.string.isRequired,
+    subcategory: PropTypes.string.isRequired,
+    quantity: PropTypes.number.isRequired,
+    unit: PropTypes.string.isRequired,
+    activity_date: PropTypes.string.isRequired,
+    co2_kg: PropTypes.number.isRequired,
+    notes: PropTypes.string,
+  }).isRequired,
+  onDelete: PropTypes.func.isRequired,
+};

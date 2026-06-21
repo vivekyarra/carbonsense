@@ -8,7 +8,7 @@ let token;
 let user;
 
 beforeAll(async () => {
-  const hash = await bcrypt.hash('password123', 10);
+  const hash = await bcrypt.hash('Password123!', 10);
   user = createUser({
     email: 'export@example.com',
     password_hash: hash,
@@ -17,7 +17,7 @@ beforeAll(async () => {
 
   const res = await request(app)
     .post('/api/auth/login')
-    .send({ email: 'export@example.com', password: 'password123' });
+    .send({ email: 'export@example.com', password: 'Password123!' });
   
   token = res.body.accessToken;
 
@@ -43,8 +43,8 @@ describe('Export CSV API', () => {
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toContain('text/csv');
     expect(res.headers['content-disposition']).toContain('attachment; filename="carbonsense_activities.csv"');
-    expect(res.text).toContain('Category,Subcategory,Quantity,Unit,CO2_kg,Date,Notes,Logged_At');
-    expect(res.text).toContain('transportation,car_petrol,10,km,1.92,2024-01-01,"Test ""notes"", yes"');
+    expect(res.text).toContain('"Category","Subcategory","Quantity","Unit","CO2_kg","Date","Notes","Logged_At"');
+    expect(res.text).toContain('"transportation","car_petrol","10","km","1.92","2024-01-01","Test ""notes"", yes"');
   });
 
   it('should return 401 if unauthorized', async () => {

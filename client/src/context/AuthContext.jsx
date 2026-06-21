@@ -2,25 +2,31 @@
  * @file Authentication context provider.
  */
 
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import PropTypes from 'prop-types';
 import api, { setToken } from '../services/api';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
 /**
- *
- * @param root0
- * @param root0.children
+ * @description Provides authentication state and methods to child components.
+ * @param {object} props
+ * @param {ReactNode} props.children - Child components that consume auth context.
  */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * @description Fetches the current authenticated user profile from the server and updates state.
+   */
   const fetchMe = useCallback(async () => {
     try {
       const res = await api.get('/auth/me');
       setUser(res.data.user);
     } catch {
+      // Auth token is invalid or expired — clear credentials and reset to logged-out state
       setToken(null);
       setUser(null);
     } finally {
@@ -34,9 +40,9 @@ export function AuthProvider({ children }) {
   }, [fetchMe]);
 
   /**
-   *
-   * @param email
-   * @param password
+   * @description Authenticates user with email and password.
+   * @param {string} email - User's email address.
+   * @param {string} password - User's password.
    */
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
@@ -45,10 +51,10 @@ export function AuthProvider({ children }) {
   };
 
   /**
-   *
-   * @param email
-   * @param password
-   * @param name
+   * @description Creates a new user account.
+   * @param {string} email - User's email address.
+   * @param {string} password - User's password.
+   * @param {string} name - User's display name.
    */
   const register = async (email, password, name) => {
     const res = await api.post('/auth/register', { email, password, name });
@@ -57,13 +63,13 @@ export function AuthProvider({ children }) {
   };
 
   /**
-   *
+   * @description Logs out the current user and clears tokens.
    */
   const logout = async () => {
     try {
       await api.post('/auth/logout');
     } catch {
-      // Ignore errors on logout
+      // Server-side logout failure is non-critical — tokens are cleared client-side regardless
     } finally {
       setToken(null);
       setUser(null);
@@ -76,3 +82,7 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

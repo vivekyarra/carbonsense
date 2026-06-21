@@ -10,14 +10,17 @@ const logger = require('./logger');
 const demoEmail = 'demo@carbonsense.com';
 
 /**
- *
+ * Seeds the database with a demo user, sample activities, and carbon-reduction tips.
+ * Uses a database transaction for atomicity and performance.
+ * @returns {Promise<void>}
  */
 async function seed() {
   try {
     logger.info('Starting database seed...');
 
     // 1. Create demo user
-    const salt = await bcrypt.genSalt(12);
+    const SALT_ROUNDS = 12;
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
     const password_hash = await bcrypt.hash('Demo1234!', salt);
 
     let user = db.prepare('SELECT id FROM users WHERE email = ?').get(demoEmail);

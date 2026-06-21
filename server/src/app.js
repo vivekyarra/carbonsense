@@ -6,8 +6,11 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
+const cookieParser = require('cookie-parser');
 const { rateLimiter } = require('./middleware/rateLimiter');
 const { errorHandler } = require('./middleware/errorHandler');
+const { requestId } = require('./middleware/requestId');
+const { sanitizeMiddleware } = require('./middleware/sanitize');
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -18,8 +21,31 @@ const exportRoutes = require('./routes/exportRoutes');
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Defense-in-depth: disable x-powered-by (also done by helmet)
+app.disable('x-powered-by');
+
+// Trust first proxy (needed for rate limiter behind reverse proxies)
+app.set('trust proxy', 1);
+
+// Request tracing - attach unique ID to every request
+app.use(requestId);
+
+// Security middleware - hardened Helmet configuration
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+    },
+  },
+  crossOriginEmbedderPolicy: true,
+  crossOriginOpenerPolicy: true,
+  crossOriginResourcePolicy: { policy: 'same-site' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+}));
 
 // CORS configuration
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
@@ -39,10 +65,16 @@ app.use(cors({
   credentials: true,
 }));
 
-// Parsers & compression
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Cookie parser (app-level so all routes can access cookies)
+app.use(cookieParser());
+
+// Parsers with body size limits to prevent large payload attacks
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(compression());
+
+// Input sanitization - strip $ keys and trim strings
+app.use(sanitizeMiddleware);
 
 // General Rate Limiting
 app.use('/api', rateLimiter);

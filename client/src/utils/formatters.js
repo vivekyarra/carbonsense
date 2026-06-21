@@ -5,7 +5,7 @@
 /**
  * Formats a date string to a readable format.
  * @param {string} dateStr 
- * @returns {string}
+ * @returns {string} The formatted date string.
  */
 export function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -20,7 +20,7 @@ export function formatDate(dateStr) {
 /**
  * Formats a number to 1 or 2 decimal places.
  * @param {number} num 
- * @returns {string}
+ * @returns {string} The formatted number string.
  */
 export function formatNumber(num) {
   if (num === null || num === undefined) return '0.0';

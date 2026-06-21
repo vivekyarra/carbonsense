@@ -4,23 +4,34 @@
 
 import axios from 'axios';
 
+/** @constant {string} DEFAULT_API_URL - Default API base URL used when VITE_API_URL is not set. */
+const DEFAULT_API_URL = 'https://carbonsense-api-806649223406.us-central1.run.app/api';
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
+
+// Validate API URL format at startup
+if (apiBaseUrl && !/^https?:\/\/.+/i.test(apiBaseUrl)) {
+  console.error(`[api] Invalid API URL format: "${apiBaseUrl}". Expected a URL starting with http:// or https://`);
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: apiBaseUrl,
   withCredentials: true // send cookies
 });
 
 let inMemoryToken = null;
 
 /**
- *
- * @param token
+ * @description Stores the JWT access token in memory.
+ * @param {string|null} token - The JWT token to store, or null to clear.
  */
 export const setToken = (token) => {
   inMemoryToken = token;
 };
 
 /**
- *
+ * @description Retrieves the current JWT access token from memory.
+ * @returns {string|null} The current JWT token, or null if not set.
  */
 export const getToken = () => inMemoryToken;
 
@@ -47,7 +58,7 @@ api.interceptors.response.use(
       
       try {
         // Attempt to refresh the token using the httpOnly cookie
-        const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/refresh`, {}, {
+        const res = await axios.post(`${apiBaseUrl}/auth/refresh`, {}, {
           withCredentials: true
         });
         

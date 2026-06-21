@@ -8,7 +8,7 @@ import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
 
 /**
- *
+ * @description Main application layout with responsive sidebar and top navigation bar.
  */
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

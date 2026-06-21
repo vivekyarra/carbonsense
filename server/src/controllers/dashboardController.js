@@ -5,7 +5,22 @@
 const db = require('../models/db');
 const NodeCache = require('node-cache');
 
-const dashboardCache = new NodeCache({ stdTTL: 300, checkperiod: 120 }); // 5 minutes TTL
+/** @constant {number} Global average daily CO2 emissions per capita (kg). */
+const GLOBAL_AVERAGE_KG = 12.9;
+/** @constant {number} India average daily CO2 emissions per capita (kg). */
+const INDIA_AVERAGE_KG = 5.2;
+/** @constant {number} Paris Agreement target daily CO2 per capita (kg). */
+const PARIS_AGREEMENT_KG = 5.5;
+/** @constant {number} Number of days in a week for trend calculation. */
+const WEEKLY_DAYS = 7;
+/** @constant {number} Number of days in a month for trend calculation. */
+const MONTHLY_DAYS = 30;
+/** @constant {number} Cache time-to-live in seconds. */
+const CACHE_TTL_SECONDS = 300;
+/** @constant {number} Cache check period in seconds. */
+const CACHE_CHECK_PERIOD = 120;
+
+const dashboardCache = new NodeCache({ stdTTL: CACHE_TTL_SECONDS, checkperiod: CACHE_CHECK_PERIOD });
 
 /**
  * Gets today's carbon score and breakdown.
@@ -70,7 +85,7 @@ function getWeeklyTrend(req, res, next) {
 
     const today = new Date();
     const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(today.getDate() - 6);
+    sevenDaysAgo.setDate(today.getDate() - (WEEKLY_DAYS - 1));
     const startDateStr = sevenDaysAgo.toISOString().split('T')[0];
 
     const stmt = db.prepare(`
@@ -85,7 +100,7 @@ function getWeeklyTrend(req, res, next) {
     
     // Fill missing days with 0
     const trend = [];
-    for (let i = 0; i <= 6; i++) {
+    for (let i = 0; i <= WEEKLY_DAYS - 1; i++) {
       const d = new Date(sevenDaysAgo);
       d.setDate(d.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
@@ -125,7 +140,7 @@ function getMonthlyTrend(req, res, next) {
 
     const today = new Date();
     const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(today.getDate() - 29);
+    thirtyDaysAgo.setDate(today.getDate() - (MONTHLY_DAYS - 1));
     const startDateStr = thirtyDaysAgo.toISOString().split('T')[0];
 
     const stmt = db.prepare(`
@@ -140,7 +155,7 @@ function getMonthlyTrend(req, res, next) {
     
     // Fill missing days with 0
     const trend = [];
-    for (let i = 0; i <= 29; i++) {
+    for (let i = 0; i <= MONTHLY_DAYS - 1; i++) {
       const d = new Date(thirtyDaysAgo);
       d.setDate(d.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
@@ -186,9 +201,9 @@ function getStats(req, res, next) {
     res.json({
       user_daily_average_kg: Number(dailyAverage.toFixed(2)),
       comparisons: {
-        global_average_kg: 12.9,
-        india_average_kg: 5.2,
-        paris_agreement_kg: 5.5
+        global_average_kg: GLOBAL_AVERAGE_KG,
+        india_average_kg: INDIA_AVERAGE_KG,
+        paris_agreement_kg: PARIS_AGREEMENT_KG
       }
     });
   } catch (error) {

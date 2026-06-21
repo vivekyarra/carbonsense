@@ -3,13 +3,14 @@
  */
 
 
+import PropTypes from 'prop-types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 /**
- *
- * @param root0
- * @param root0.data
- * @param root0.isLoading
+ * @description Bar chart displaying the 7-day emissions trend.
+ * @param {object} props
+ * @param {object} [props.data] - Weekly trend data with a trend array of daily totals.
+ * @param {boolean} props.isLoading - Whether the data is still loading.
  */
 export function WeeklyTrend({ data, isLoading }) {
   if (isLoading) {
@@ -57,3 +58,15 @@ export function WeeklyTrend({ data, isLoading }) {
     </div>
   );
 }
+
+WeeklyTrend.propTypes = {
+  data: PropTypes.shape({
+    trend: PropTypes.arrayOf(
+      PropTypes.shape({
+        date: PropTypes.string.isRequired,
+        total: PropTypes.number.isRequired,
+      })
+    ),
+  }),
+  isLoading: PropTypes.bool.isRequired,
+};

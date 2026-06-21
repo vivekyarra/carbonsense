@@ -38,7 +38,7 @@ export const ENERGY_FACTORS = {
  * @param {string} category 
  * @param {string} subcategory 
  * @param {number} quantity 
- * @returns {number}
+ * @returns {number} The calculated CO2 estimate in kg.
  */
 export function calculateCO2(category, subcategory, quantity) {
   if (quantity < 0) return 0;
